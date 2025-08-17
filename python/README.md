@@ -21,6 +21,9 @@ send_once_args.py 角度1 角度2--id アドレス
 monitor_and_ping.py　インターバル（秒）
 
 `python3 monitor_and_ping.py　4`
+
+
+
 PCからは　ID:0x6a　/ 9,0,0,0,0,0,0,0   が送信されると
 マイコンからは　ID:0x69　/ 0 , 角度１(上位）,角度１（下位）, 角度２(上位）,角度２（下位）,255,255,255 が返答されます。
 
