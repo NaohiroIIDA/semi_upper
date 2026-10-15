@@ -9,6 +9,8 @@ import tty
 
 import can
 
+from can_bus import add_bus_args, bus_label, open_bus
+
 TX_PAYLOAD = bytes([9, 0, 0, 0, 0, 255, 255, 255])
 
 def format_candump_line(iface: str, msg: can.Message) -> str:
@@ -60,14 +62,19 @@ def sender_loop(bus: can.BusABC, can_id: int, iface: str, interval: float, stop_
             break
 
 def main():
-    ap = argparse.ArgumentParser(description="SocketCAN monitor (candump-like) + periodic TX")
+    ap = argparse.ArgumentParser(description="CAN monitor (candump-like) + periodic TX")
     ap.add_argument("interval", type=float, help="TX interval seconds (e.g., 1.0)")
-    ap.add_argument("--iface", default="can0", help="SocketCAN interface (default: can0)")
     ap.add_argument("--id", type=lambda x: int(x, 0), default=0x6a, help="TX CAN ID (default: 0x6a)")
+    add_bus_args(ap)
     args = ap.parse_args()
 
     # CANバスに接続
-    bus = can.interface.Bus(channel=args.iface, interface="socketcan")
+    try:
+        bus = open_bus(args)
+    except can.CanError as e:
+        print("open failed:", e)
+        sys.exit(2)
+    label = bus_label(args)
 
     stop_event = threading.Event()
 
@@ -78,19 +85,20 @@ def main():
     # 送信スレッド開始
     tx_thread = threading.Thread(
         target=sender_loop,
-        args=(bus, args.id, args.iface, args.interval, stop_event),
+        args=(bus, args.id, label, args.interval, stop_event),
         daemon=True,
     )
     tx_thread.start()
 
-    print(f"Monitoring {args.iface}. Receiving like candump; sending to ID 0x{args.id:03X} every {args.interval}s.")
+    print(f"Monitoring {label}. Receiving like candump; sending to ID 0x{args.id:03X} every {args.interval}s.")
     try:
         while not stop_event.is_set():
             # 受信（タイムアウト短めでポーリング）
             msg = bus.recv(timeout=0.2)
-            if msg is not None:
+            # gs_usb は自分の送信フレームをエコーで返すので表示しない
+            if msg is not None and msg.is_rx:
                 # candump 風表示（IDと8ビットデータ）
-                print(format_candump_line(args.iface, msg))
+                print(format_candump_line(label, msg))
     except KeyboardInterrupt:
         stop_event.set()
     finally:

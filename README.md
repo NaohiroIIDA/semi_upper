@@ -5,7 +5,7 @@ PC（Linux / SocketCAN）から **CAN 経由で目標角度を送る・現在角
 
 ```
  ┌──────────────┐   CAN 500kbps (11bit ID)   ┌──────────────────────┐
- │  PC (Linux)  │ ── 0x06A 目標角度/要求 ──▶ │  Bluepill (STM32F103) │
+ │ PC Linux/Mac │ ── 0x06A 目標角度/要求 ──▶ │  Bluepill (STM32F103) │
  │  python-can  │ ◀── 0x069 現在角度 ─────── │  eXoCAN               │
  └──────────────┘                            └───┬──────────┬───────┘
                                                  │ SPI      │ GPIO
@@ -36,14 +36,14 @@ PC（Linux / SocketCAN）から **CAN 経由で目標角度を送る・現在角
    cd STM32duino
    pio run -t upload
    ```
-2. **PC 側の CAN インターフェースを起動**
-   ```sh
-   sudo ip link set can0 up type can bitrate 500000
-   pip install python-can
-   ```
+2. **PC 側の準備**
+   - Linux: `sudo ip link set can0 up type can bitrate 500000` と `pip install python-can`
+   - macOS: candleLight などの USB-CAN をつなぎ、`pip install python-can gs_usb pyusb pyserial` と `brew install libusb`
+
+   詳しくは [python/README.md](python/README.md) を参照してください。
 3. **目標角度を送る**（軸1=220°, 軸2=90°）
    ```sh
-   python3 python/send_once_args.py 220 90 --id 0x6a
+   python3 python/send_once_args.py 220 90
    ```
 4. **現在角度を定期的に問い合わせてモニタする**（4秒間隔）
    ```sh

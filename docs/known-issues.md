@@ -11,10 +11,9 @@
 **影響**: 256°以上を指定すると 1° 小さく解釈されます（例: 300° → 299°）。不感帯（±5°）の範囲に収まるので
 実用上は目立ちませんが、ファーム側を `(m1 << 8) | m2` に直すのが本来の形です。
 
-## 2. `send_once_args.py` のデフォルト ID が 0x69
+## 2. ~~`send_once_args.py` のデフォルト ID が 0x69~~（修正済み）
 
-デフォルトの `--id` が `0x69`（マイコンの**送信** ID）になっています。マイコンが受け付けるのは `0x6A` です。
-**`--id 0x6a` を必ず指定してください**（README の例はそうなっています）。
+デフォルトの `--id` が `0x69`（マイコンの送信 ID）になっていたので、`0x6A` に直しました。
 
 ## 3. 軸番号とモータ端子が交差している
 
@@ -56,6 +55,7 @@
 `setup()` の `can.begin(...)` のコメントは「250k bit rate, no transceiver chip」ですが、実際は
 **500kbps・トランシーバあり（`PORTA_11_12_XCVR`）** です。
 
-## 10. Python ツールは Linux 専用
+## 10. ~~Python ツールは Linux 専用~~（対応済み）
 
-SocketCAN（`interface="socketcan"`）と `termios`/`tty` を使っているので、Linux 以外では動きません。
+`--interface` オプションを追加し、macOS でも gs_usb（candleLight）や slcan（CANable）で動くようにしました。
+[python/README.md](../python/README.md) を参照してください。
