@@ -1,1 +1,4 @@
 __pycache__/
+jog_*.csv
+jog_*_summary.txt
+.venv/

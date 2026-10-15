@@ -25,6 +25,9 @@ pio run -t upload    # 書き込み
 pio device monitor -b 115200   # デバッグ出力（Serial2 を USB-UART で接続した場合）
 ```
 
+> **可動範囲**: 機構上、軸1 は 180〜210°、軸2 は 100〜180° です。ファームウェアは目標角度を制限していないので、
+> 範囲は PC 側（[python/can_bus.py](../python/can_bus.py) の `AXIS_LIMITS`）で守っています。
+
 ## ピン割り当て
 
 | 機能 | ピン | 備考 |

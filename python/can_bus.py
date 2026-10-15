@@ -11,6 +11,12 @@ import can
 DEFAULT_INTERFACE = "socketcan" if sys.platform.startswith("linux") else "gs_usb"
 DEFAULT_CHANNEL = {"socketcan": "can0", "gs_usb": "0"}
 
+# 機構的な可動範囲 [deg]（目標角度はこの範囲に制限する）
+AXIS_LIMITS = (
+    (180, 210),  # 軸1
+    (100, 180),  # 軸2
+)
+
 # Homebrew の libusb の場所（pyusb は標準ではここを探さない）
 LIBUSB_CANDIDATES = [
     "/opt/homebrew/lib/libusb-1.0.dylib",  # Apple Silicon

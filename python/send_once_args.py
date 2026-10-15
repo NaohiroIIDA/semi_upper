@@ -5,11 +5,12 @@ import time
 
 import can
 
-from can_bus import add_bus_args, open_bus
+from can_bus import AXIS_LIMITS, add_bus_args, open_bus
 
-def to_u16_be_bytes(n: int):
-    if not (0 <= n <= 360):
-        raise ValueError(f"value out of range (0..360): {n}")
+def to_u16_be_bytes(n: int, axis: int):
+    lo, hi = AXIS_LIMITS[axis]
+    if not (lo <= n <= hi):
+        raise ValueError(f"axis{axis + 1} value out of mechanical range ({lo}..{hi}): {n}")
     return (n >> 8) & 0xFF, n & 0xFF  # 上位, 下位
 
 def wait_echo(bus: can.BusABC, can_id: int, timeout: float) -> bool:
@@ -22,16 +23,16 @@ def wait_echo(bus: can.BusABC, can_id: int, timeout: float) -> bool:
     return False
 
 def main():
-    p = argparse.ArgumentParser(description="Send one CAN frame with two angles (0..360).")
-    p.add_argument("arg1", type=int, help="first value (0..360)")
-    p.add_argument("arg2", type=int, help="second value (0..360)")
+    p = argparse.ArgumentParser(description="Send one CAN frame with two target angles.")
+    p.add_argument("arg1", type=int, help=f"axis1 target ({AXIS_LIMITS[0][0]}..{AXIS_LIMITS[0][1]})")
+    p.add_argument("arg2", type=int, help=f"axis2 target ({AXIS_LIMITS[1][0]}..{AXIS_LIMITS[1][1]})")
     p.add_argument("--id", type=lambda x: int(x, 0), default=0x6a, help="CAN ID (default: 0x6a)")
     add_bus_args(p)
     args = p.parse_args()
 
     try:
-        a1_hi, a1_lo = to_u16_be_bytes(args.arg1)
-        a2_hi, a2_lo = to_u16_be_bytes(args.arg2)
+        a1_hi, a1_lo = to_u16_be_bytes(args.arg1, 0)
+        a2_hi, a2_lo = to_u16_be_bytes(args.arg2, 1)
     except ValueError as e:
         print(e)
         sys.exit(1)
